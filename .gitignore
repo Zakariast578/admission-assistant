@@ -1,0 +1,33 @@
+# Python Runtime & Virtual Envs
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+*.sq3
+*.db
+
+# Sensitive Environment Configurations
+.env
+.env.local
+*.env
+
+# Raw Documents (Do not commit large source PDFs to public git)
+backend/data/raw_documents/*
+!backend/data/raw_documents/.gitkeep
+
+# Keep Processed FAISS Index for Cloud Deployment
+# (Allow tracking of the persistent vector index)
+!backend/data/processed/faiss_index/*
+
+# Next.js / Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# System & IDE
+.vscode/
+.idea/
+.DS_Store
