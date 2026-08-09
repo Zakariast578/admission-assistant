@@ -1,33 +1,151 @@
-# Python Runtime & Virtual Envs
+# ============================================================
+# Admission Assistant - Root .gitignore
+# ============================================================
+
+
+# ------------------------------------------------------------
+# Python
+# ------------------------------------------------------------
+
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Python virtual environments
 .venv/
 venv/
 ENV/
-*.sq3
-*.db
+env/
 
-# Sensitive Environment Configurations
+# Python distribution / build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+
+# ------------------------------------------------------------
+# Environment & Secrets
+# ------------------------------------------------------------
+
 .env
-.env.local
+.env.*
 *.env
 
-# Raw Documents (Do not commit large source PDFs to public git)
+# Allow example environment files
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
+
+# ------------------------------------------------------------
+# Database / Local Runtime Files
+# ------------------------------------------------------------
+
+*.db
+*.sqlite
+*.sqlite3
+*.sq3
+
+
+# ------------------------------------------------------------
+# Backend - Raw Documents
+# ------------------------------------------------------------
+
+# Do NOT commit raw admission documents
 backend/data/raw_documents/*
+
+# Keep the directory itself in Git
 !backend/data/raw_documents/.gitkeep
 
-# Keep Processed FAISS Index for Cloud Deployment
-# (Allow tracking of the persistent vector index)
-!backend/data/processed/faiss_index/*
 
-# Next.js / Frontend
+# ------------------------------------------------------------
+# Backend - Processed / Generated Data
+# ------------------------------------------------------------
+
+
+# Generated RAG / FAISS index
+backend/data/processed/
+
+
+# ------------------------------------------------------------
+# Backend - Generated Files
+# ------------------------------------------------------------
+
+backend/logs/
+*.log
+
+# Python cache anywhere in backend
+backend/**/__pycache__/
+backend/**/*.py[cod]
+
+
+# ------------------------------------------------------------
+# Frontend - Node / Vite
+# ------------------------------------------------------------
+
 frontend/node_modules/
-frontend/.next/
-frontend/out/
+frontend/dist/
 frontend/build/
 
-# System & IDE
+# Vite cache
+frontend/.vite/
+
+# Environment files
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+
+# ------------------------------------------------------------
+# Frontend - Framework / Tooling
+# ------------------------------------------------------------
+
+# Next.js
+frontend/.next/
+frontend/out/
+
+# Vite
+frontend/.vite/
+
+
+# ------------------------------------------------------------
+# IDE / Editors
+# ------------------------------------------------------------
+
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# VS Code local settings
+!.vscode/extensions.json
+!.vscode/settings.example.json
+
+
+# ------------------------------------------------------------
+# Operating System
+# ------------------------------------------------------------
+
 .DS_Store
+Thumbs.db
+Desktop.ini
+
+
+# ------------------------------------------------------------
+# Temporary Files
+# ------------------------------------------------------------
+
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~

@@ -4,7 +4,7 @@ from llama_index.core.schema import BaseNode, Document
 from app.core.logging_config import logger
 
 
-def chunk_documents(documents: List[Document], chunk_size: int = 512, chunk_overlap: int = 50) -> List[BaseNode]:
+def chunk_documents(documents: List[Document], chunk_size: int = 768, chunk_overlap: int = 124) -> List[BaseNode]:
     """Splits raw documents into smaller semantic nodes with overlapping boundaries."""
     logger.info(f"Splitting {len(documents)} documents with chunk_size={chunk_size}, overlap={chunk_overlap}")
     

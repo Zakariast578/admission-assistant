@@ -21,3 +21,4 @@ python-multipart==0.0.32
 tenacity==9.1.4
 httpx==0.28.1
 pytest==9.1.1
+pymupdf==1.28.2

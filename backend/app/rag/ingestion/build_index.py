@@ -1,57 +1,53 @@
-import os
-import sys
 from pathlib import Path
 
-# Ensure root directory is on the Python path
-sys.path.append(str(Path(__file__).resolve().parents[3]))
-
 import faiss
-from llama_index.core import VectorStoreIndex, StorageContext
-from llama_index.core.storage.docstore import SimpleDocumentStore
-from llama_index.core.storage.index_store import SimpleIndexStore
+from llama_index.core import Settings, StorageContext, VectorStoreIndex
 from llama_index.vector_stores.faiss import FaissVectorStore
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
 from app.core.config import settings
 from app.core.logging_config import logger
-from app.rag.ingestion.loaders import load_documents_from_directory
+from app.rag.ingestion.embedder import get_embedding_model
+from app.rag.ingestion.loaders import load_documents_from_directories
 from app.rag.ingestion.chunker import chunk_documents
 
 
-def build_and_persist_index():
+def _default_source_directories() -> list[str]:
+    backend_root = Path(__file__).resolve().parents[3]
+    candidate_paths = [backend_root / settings.RAW_DOCS_PATH, backend_root / "documents"]
+    return [str(path) for path in candidate_paths if path.exists()]
+
+
+def build_and_persist_index(source_directories: list[str] | None = None):
     logger.info("--- Starting Vector & Document Storage Pipeline ---")
 
-    documents = load_documents_from_directory(settings.RAW_DOCS_PATH)
+    documents = load_documents_from_directories(source_directories or _default_source_directories())
     if not documents:
-        logger.error(f"No documents found in '{settings.RAW_DOCS_PATH}'. Add PDF/DOCX files before indexing.")
+        logger.error("No documents found in the configured source directories.")
         return
 
     nodes = chunk_documents(documents)
 
-    # BAAI/bge-small-en-v1.5 embedding dimension is 384
+    # Local embedding setup (384 dimensions for BAAI/bge-small-en-v1.5)
     embedding_dimension = 384
     faiss_index = faiss.IndexFlatL2(embedding_dimension)
     vector_store = FaissVectorStore(faiss_index=faiss_index)
 
-    # Initialize a complete storage context with vector, doc, and index stores
-    storage_context = StorageContext.from_defaults(
-        vector_store=vector_store,
-        docstore=SimpleDocumentStore(),
-        index_store=SimpleIndexStore()
-    )
+    # Initialize storage context with both vector_store and default docstore
+    storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
     logger.info("Initializing Local HuggingFace Embedding Engine...")
-    embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+    embed_model = get_embedding_model()
 
     logger.info("Building Index and mapping text chunks to vector store...")
-    index = VectorStoreIndex(
+    Settings.embed_model = embed_model
+    VectorStoreIndex(
         nodes,
         storage_context=storage_context,
         embed_model=embed_model
     )
 
-    os.makedirs(settings.FAISS_INDEX_PATH, exist_ok=True)
-    # Persists vector_store, docstore.json, and index_store.json together
+    # Persist EVERYTHING (vectors + docstore + index_store)
+    Path(settings.FAISS_INDEX_PATH).mkdir(parents=True, exist_ok=True)
     storage_context.persist(persist_dir=settings.FAISS_INDEX_PATH)
     logger.info(f"✅ Full Index and Document Store successfully persisted to: {settings.FAISS_INDEX_PATH}")
 

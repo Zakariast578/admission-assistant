@@ -1,0 +1,25 @@
+:root {
+  --color-brand-accent: #418FDE;
+  --color-text-body: #727272;
+  --color-crimson-accent: #C62828;
+  --color-muted-gold: #8A6B1F;
+  --color-deep-navy: #002147;
+  --color-border-muted: #DADADA;
+  --color-soft-neutral: #F2F2F2;
+  --color-surface-white: #FFFFFF;
+  --color-overlay-transparent: #FFFFFF00;
+  --font-sans: "Inter", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+@theme {
+  --font-sans: var(--font-sans);
+  --color-brand-accent: var(--color-brand-accent);
+  --color-text-body: var(--color-text-body);
+  --color-crimson-accent: var(--color-crimson-accent);
+  --color-muted-gold: var(--color-muted-gold);
+  --color-deep-navy: var(--color-deep-navy);
+  --color-border-muted: var(--color-border-muted);
+  --color-soft-neutral: var(--color-soft-neutral);
+  --color-surface-white: var(--color-surface-white);
+  --color-overlay-transparent: var(--color-overlay-transparent);
+}
