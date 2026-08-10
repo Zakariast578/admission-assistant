@@ -115,7 +115,7 @@ FAISS_INDEX_PATH="storage"
 Ingest documents and build the FAISS vector index:
 
 ```bash
-python scripts/ingest_docs.py
+python -m app.rag.ingestion.build_index
 ```
 
 Start the FastAPI server:
@@ -124,7 +124,7 @@ Start the FastAPI server:
 uvicorn app.main:app --reload --port 8000
 ```
 
-- API docs (Swagger): [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- API
 - Health check: [http://127.0.0.1:8000/api/v1/health](http://127.0.0.1:8000/api/v1/health)
 
 ### 3. Frontend Setup
