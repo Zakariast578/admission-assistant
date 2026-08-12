@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.logging_config import logger
-from app.api.routes import health, chat
+from app.api.routes import health, chat, documents
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -19,8 +19,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(health.router, prefix="/api/v1", tags=["Health"])
-app.include_router(chat.router, prefix="/api/v1", tags=["Chat"])
+# Route inclusion under /api/v1
+app.include_router(health.router, prefix=settings.API_V1_STR, tags=["Health"])
+app.include_router(chat.router, prefix=settings.API_V1_STR, tags=["Chat"])
+app.include_router(documents.router, prefix=settings.API_V1_STR, tags=["Documents"])
 
 
 @app.get("/")

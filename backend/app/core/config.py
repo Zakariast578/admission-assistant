@@ -2,30 +2,41 @@ import os
 from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Admission Assistant RAG API"
-    ENVIRONMENT: str = "development"
-    LOG_LEVEL: str = "INFO"
-
+    API_V1_STR: str = "/api/v1"
+    ENVIRONMENT: str = "development" 
+    
+    # Server Configuration
     HOST: str = "0.0.0.0"
     PORT: int = 8000
-    CORS_ORIGINS: List[str] = ["http://localhost:3000"]
-
-    # Hugging Face Settings
-    HF_TOKEN: str = ""
-
+    LOG_LEVEL: str = "INFO"
+    
     # LLM Settings
-    LLM_PROVIDER: str = "openrouter"
-    OPENROUTER_API_KEY: str = ""
-    OPENROUTER_MODEL: str = "inclusionai/ling-3.0-tiny:free"
-
-    # Gemini Settings
+    LLM_PROVIDER: str = "gemini"
     GOOGLE_API_KEY: str = ""
-    GENERATIVE_MODEL: str = "gemini-1.5-pro"
-    EMBEDDING_MODEL: str = "models/embedding-001"
+    GENERATIVE_MODEL: str = "gemini-3.6-flash"
+    
+    # Hugging Face & Embeddings
+    HF_TOKEN: str = ""
+    EMBEDDING_MODEL: str = "BAAI/bge-small-en-v1.5"
 
-    # Data Paths
+    # CORS Settings
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+    ]
+
+    # Database Settings
+    POSTGRES_USER: str = "snu_admin"
+    POSTGRES_PASSWORD: str = "snu_password_123"
+    POSTGRES_HOST: str = "127.0.0.1"
+    POSTGRES_PORT: int = 5432
+    POSTGRES_DB: str = "snu_admissions_db"
+
+    # Storage Paths
     FAISS_INDEX_PATH: str = "data/processed/faiss_index"
     METADATA_DB_PATH: str = "data/processed/metadata.db"
     RAW_DOCS_PATH: str = "data/raw_documents"
@@ -36,9 +47,7 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-
 settings = Settings()
 
-# Export HF_TOKEN globally to system environment for huggingface_hub library
 if settings.HF_TOKEN:
     os.environ["HF_TOKEN"] = settings.HF_TOKEN

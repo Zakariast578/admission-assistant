@@ -1,5 +1,5 @@
 import { Bot, Sparkles, UserRound } from 'lucide-react';
-import type { ChatMessageModel } from '../types/api';
+import type { ChatMessageModel } from '../types/index';
 import ReactMarkdown from 'react-markdown';
 
 interface ChatMessageProps {
@@ -12,21 +12,30 @@ export function ChatMessage({ message }: ChatMessageProps) {
   return (
     <div className={`flex animate-fade-in ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div className={`flex max-w-[88%] items-start gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-        <div className={`mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${isUser ? 'bg-[#418FDE] text-white' : 'bg-[#F2F2F2] text-[#002147]'}`}>
+        <div className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${isUser ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>
           {isUser ? <UserRound className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
         </div>
 
-        <div className={`rounded-3xl border px-4 py-3 shadow-sm ${isUser ? 'border-[#418FDE]/20 bg-[#418FDE] text-white' : 'border-[#DADADA] bg-white text-[#002147]'}`}>
-          <div className="mb-1 flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] opacity-70">
+        <div className={`rounded-2xl border px-3.5 py-2.5 shadow-sm ${isUser ? 'border-blue-500 bg-blue-600 text-white' : 'border-gray-200 bg-white text-gray-900'}`}>
+          <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider opacity-70">
             {isUser ? 'You' : 'Assistant'}
-            {!isUser && <Sparkles className="h-3.5 w-3.5" />}
+            {!isUser && <Sparkles className="h-3 w-3 text-amber-500" />}
           </div>
           
-          <div className="text-sm leading-6 prose prose-slate max-w-none">
+          <div className="text-xs leading-relaxed space-y-2">
             {isUser ? (
               <div className="whitespace-pre-wrap">{message.content}</div>
             ) : (
-              <ReactMarkdown>{message.content}</ReactMarkdown>
+              <ReactMarkdown
+                components={{
+                  p: ({ children }) => <p className="mb-1.5 last:mb-0 text-gray-800">{children}</p>,
+                  ul: ({ children }) => <ul className="list-disc pl-4 space-y-1 my-1">{children}</ul>,
+                  ol: ({ children }) => <ol className="list-decimal pl-4 space-y-1 my-1">{children}</ol>,
+                  li: ({ children }) => <li className="text-gray-800">{children}</li>,
+                }}
+              >
+                {message.content}
+              </ReactMarkdown>
             )}
           </div>
         </div>

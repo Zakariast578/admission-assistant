@@ -1,24 +1,32 @@
+# Web Framework & Core Utility
 fastapi==0.141.1
-uvicorn==0.52.1
+uvicorn[standard]==0.52.1
 pydantic==2.13.4
 pydantic-settings==2.15.0
 python-dotenv==1.2.2
+python-multipart==0.0.32
+httpx==0.28.1
+tenacity==9.1.4
 
+# LlamaIndex & Local Integration Drivers
 llama-index-core==0.14.23
+llama-index-llms-gemini=0.6.2
+llama-index-llms-ollama==0.5.3
 llama-index-llms-google-genai==0.9.6
 llama-index-embeddings-google-genai==0.5.1
+llama-index-embeddings-huggingface==0.7.0
 llama-index-vector-stores-faiss==0.6.0
-llama-index-llms-openrouter==0.5.1
-llama-index-embeddings-huggingface ==0.7.0
-
 faiss-cpu==1.15.0
-google-genai==2.17.0
 
+# PostgreSQL ORM & Database Drivers
+asyncpg==0.31.0
+psycopg2-binary==2.9.12
+sqlalchemy==4.16.0
+alembic==1.19.1
+
+# Document Parsers & Testing
 pypdf==6.15.0
+pymupdf==1.28.2
 python-docx==1.2.0
 beautifulsoup4==4.15.0
-python-multipart==0.0.32
-tenacity==9.1.4
-httpx==0.28.1
 pytest==9.1.1
-pymupdf==1.28.2
