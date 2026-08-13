@@ -85,7 +85,7 @@ export function Header() {
         shadow-lg
       "
     >
-      {/* Subtle background glow */}
+      {/* Background glow effects */}
       <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[var(--color-brand-accent)]/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-[var(--color-brand-accent)]/5 blur-3xl" />
 
@@ -142,10 +142,10 @@ export function Header() {
               rounded-full
               border
               px-2.5 py-2
+              backdrop-blur-md
               sm:gap-2.5
               sm:px-3.5
               ${statusBg}
-              backdrop-blur-md
             `}
           >
             {loading ? (
@@ -183,7 +183,7 @@ export function Header() {
           </div>
         </div>
 
-        {/* Trust / Knowledge Base Bar */}
+        {/* Knowledge Base Info Bar */}
         <div
           className="
             mt-4

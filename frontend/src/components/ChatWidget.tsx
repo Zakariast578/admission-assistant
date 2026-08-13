@@ -43,7 +43,6 @@ export const ChatWidget: React.FC = () => {
 
   const messageContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     if (!isOpen) return;
 
@@ -100,7 +99,7 @@ export const ChatWidget: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 font-sans">
+    <div className="fixed bottom-5 right-5 z-50 font-sans sm:bottom-6 sm:right-6">
       {!isOpen ? (
         <button
           onClick={() => setIsOpen(true)}
@@ -108,18 +107,17 @@ export const ChatWidget: React.FC = () => {
           className="
             flex items-center gap-2.5
             rounded-full
-            bg-[#002147]
+            bg-[var(--color-deep-navy)]
             px-5 py-3.5
             text-sm font-semibold text-white
-            shadow-[0_10px_35px_rgba(0,33,71,0.28)]
+            shadow-xl
             transition-all duration-200
             hover:scale-[1.03]
-            hover:bg-[#001a39]
+            hover:opacity-95
             active:scale-[0.98]
           "
         >
-          <MessageSquare className="h-5 w-5 text-[#418FDE]" />
-
+          <MessageSquare className="h-5 w-5 text-[var(--color-brand-accent)]" />
           <span>Ask Assistant</span>
         </button>
       ) : (
@@ -129,29 +127,29 @@ export const ChatWidget: React.FC = () => {
             rounded-2xl
             border border-gray-200
             bg-white
-            shadow-[0_20px_60px_rgba(0,0,0,0.18)]
-            
-            w-[calc(100vw-2rem)]
-            sm:w-[420px]
-            md:w-[440px]
+            shadow-2xl
 
             h-[calc(100vh-2rem)]
+            w-[calc(100vw-2rem)]
             sm:h-[650px]
+            sm:w-[420px]
+
             md:h-[680px]
+            md:w-[440px]
           "
         >
           {/* Header */}
           <div
             className="
               flex shrink-0 items-center justify-between
-              bg-[#002147]
+              bg-[var(--color-deep-navy)]
               px-5 py-4
               text-white
             "
           >
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
-                <MessageSquare className="h-5 w-5 text-[#418FDE]" />
+                <MessageSquare className="h-5 w-5 text-[var(--color-brand-accent)]" />
               </div>
 
               <div>
@@ -160,7 +158,7 @@ export const ChatWidget: React.FC = () => {
                 </div>
 
                 <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-white/65">
-                  <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                   Online
                 </div>
               </div>
@@ -186,11 +184,11 @@ export const ChatWidget: React.FC = () => {
             ref={messageContainerRef}
             className="
               flex-1
+              space-y-5
               overflow-y-auto
               bg-[#F8FAFC]
               px-4 py-5
               sm:px-5
-              space-y-5
             "
           >
             {messages.map((message) => {
@@ -224,19 +222,19 @@ export const ChatWidget: React.FC = () => {
                         rounded-xl
                         ${
                           isUser
-                            ? 'bg-[#418FDE] text-white'
-                            : 'bg-[#002147] text-white'
+                            ? 'bg-[var(--color-brand-accent)] text-white'
+                            : 'bg-[var(--color-deep-navy)] text-white'
                         }
                       `}
                     >
                       {isUser ? (
                         <UserRound className="h-4 w-4" />
                       ) : (
-                        <Bot className="h-4 w-4 text-[#418FDE]" />
+                        <Bot className="h-4 w-4 text-[var(--color-brand-accent)]" />
                       )}
                     </div>
 
-                    {/* Message */}
+                    {/* Message Bubble */}
                     <div
                       className={`
                         rounded-2xl
@@ -246,8 +244,8 @@ export const ChatWidget: React.FC = () => {
                         shadow-sm
                         ${
                           isUser
-                            ? 'rounded-tr-md border border-[#418FDE] bg-[#418FDE] text-white'
-                            : 'rounded-tl-md border border-gray-200 bg-white text-[#002147]'
+                            ? 'rounded-tr-md border border-[var(--color-brand-accent)] bg-[var(--color-brand-accent)] text-white'
+                            : 'rounded-tl-md border border-gray-200 bg-white text-[var(--color-deep-navy)]'
                         }
                       `}
                     >
@@ -262,14 +260,14 @@ export const ChatWidget: React.FC = () => {
                           ${
                             isUser
                               ? 'text-white/75'
-                              : 'text-[#002147]/60'
+                              : 'text-[var(--color-deep-navy)]/60'
                           }
                         `}
                       >
                         <span>{isUser ? 'You' : 'Assistant'}</span>
 
                         {!isUser && (
-                          <Sparkles className="h-3 w-3 text-[#418FDE]" />
+                          <Sparkles className="h-3 w-3 text-[var(--color-brand-accent)]" />
                         )}
                       </div>
 
@@ -279,11 +277,11 @@ export const ChatWidget: React.FC = () => {
                           prose-sm
                           max-w-none
                           break-words
-                          [&_p]:my-1
-                          [&_ul]:my-2
-                          [&_ol]:my-2
                           [&_li]:my-0.5
+                          [&_ol]:my-2
+                          [&_p]:my-1
                           [&_strong]:font-semibold
+                          [&_ul]:my-2
                         "
                       >
                         {isUser ? (
@@ -302,19 +300,19 @@ export const ChatWidget: React.FC = () => {
               );
             })}
 
-            {/* Loading */}
+            {/* Loading Indicator */}
             {loading && (
               <div className="flex justify-start">
                 <div className="flex items-start gap-3">
-                  <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#002147]">
-                    <Bot className="h-4 w-4 text-[#418FDE]" />
+                  <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-deep-navy)]">
+                    <Bot className="h-4 w-4 text-[var(--color-brand-accent)]" />
                   </div>
 
                   <div className="rounded-2xl rounded-tl-md border border-gray-200 bg-white px-4 py-3 shadow-sm">
                     <div className="flex items-center gap-2">
-                      <LoaderCircle className="h-4 w-4 animate-spin text-[#418FDE]" />
+                      <LoaderCircle className="h-4 w-4 animate-spin text-[var(--color-brand-accent)]" />
 
-                      <span className="text-xs font-medium text-[#002147]/70">
+                      <span className="text-xs font-medium text-[var(--color-deep-navy)]/70">
                         Thinking...
                       </span>
                     </div>
@@ -323,7 +321,7 @@ export const ChatWidget: React.FC = () => {
               </div>
             )}
 
-            {/* Error */}
+            {/* Error Message */}
             {error && (
               <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-center text-xs text-red-700">
                 {error}
@@ -331,7 +329,7 @@ export const ChatWidget: React.FC = () => {
             )}
           </div>
 
-          {/* Input */}
+          {/* Input Bar */}
           <div className="shrink-0 border-t border-gray-200 bg-white px-4 py-4">
             <div
               className={`
@@ -345,12 +343,12 @@ export const ChatWidget: React.FC = () => {
                 transition-all
                 ${
                   focused
-                    ? 'border-[#418FDE] bg-white ring-2 ring-[#418FDE]/15'
+                    ? 'border-[var(--color-brand-accent)] bg-white ring-2 ring-[var(--color-brand-accent)]/15'
                     : 'border-gray-200'
                 }
               `}
             >
-              <MessageCircleMore className="h-5 w-5 shrink-0 text-[#418FDE]" />
+              <MessageCircleMore className="h-5 w-5 shrink-0 text-[var(--color-brand-accent)]" />
 
               <input
                 value={input}
@@ -374,7 +372,7 @@ export const ChatWidget: React.FC = () => {
                   px-1
                   py-1
                   text-sm
-                  text-[#002147]
+                  text-[var(--color-deep-navy)]
                   outline-none
                   placeholder:text-gray-400
                 "
@@ -393,12 +391,11 @@ export const ChatWidget: React.FC = () => {
                   items-center
                   justify-center
                   rounded-xl
-                  bg-[#418FDE]
+                  bg-[var(--color-brand-accent)]
                   text-white
                   shadow-sm
                   transition-all
-                  hover:bg-[#2f76b9]
-                  hover:shadow-md
+                  hover:opacity-95
                   disabled:cursor-not-allowed
                   disabled:bg-gray-300
                 "

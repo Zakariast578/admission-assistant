@@ -340,7 +340,8 @@ export const Home: React.FC = () => {
                   items-center
                   justify-center
                   rounded-xl
-                  bg-[var(--color-deep-navy)]
+                  bg-[var(--color-brand-accent)]
+                  text-white
                   shadow-sm
                 "
               >
@@ -378,7 +379,7 @@ export const Home: React.FC = () => {
                   transition-all
                   ${
                     activeTab === 'chat'
-                      ? 'bg-white text-[var(--color-deep-navy)] shadow-sm'
+                      ? 'bg-[var(--color-brand-accent)] text-white shadow-sm'
                       : 'text-gray-500 hover:text-gray-800'
                   }
                 `}
@@ -402,7 +403,7 @@ export const Home: React.FC = () => {
                   transition-all
                   ${
                     activeTab === 'documents'
-                      ? 'bg-white text-[var(--color-deep-navy)] shadow-sm'
+                      ? 'bg-[var(--color-brand-accent)] text-white shadow-sm'
                       : 'text-gray-500 hover:text-gray-800'
                   }
                 `}
@@ -483,8 +484,8 @@ export const Home: React.FC = () => {
               <div className="mt-auto">
                 <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
-                      <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-brand-accent)] text-white">
+                      <ShieldCheck className="h-4 w-4" />
                     </div>
 
                     <div>
@@ -556,8 +557,8 @@ export const Home: React.FC = () => {
                       className="hidden"
                     />
 
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm">
-                      <UploadCloud className="h-5 w-5 text-[var(--color-brand-accent)]" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-brand-accent)] text-white shadow-sm">
+                      <UploadCloud className="h-5 w-5" />
                     </div>
 
                     <p className="mt-3 text-xs font-semibold text-gray-700">
@@ -652,9 +653,9 @@ export const Home: React.FC = () => {
                   </p>
 
                   <div className="mt-1 flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-brand-accent)]" />
 
-                    <span className="text-xs font-semibold text-emerald-600">
+                    <span className="text-xs font-semibold text-[var(--color-brand-accent)]">
                       Indexed
                     </span>
                   </div>
@@ -711,9 +712,9 @@ export const Home: React.FC = () => {
           </div>
 
           <div className="hidden items-center gap-2 sm:flex">
-            <div className="flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              <span className="text-[10px] font-semibold text-emerald-600">
+            <div className="flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-brand-accent)]" />
+              <span className="text-[10px] font-semibold text-[var(--color-brand-accent)]">
                 Knowledge Connected
               </span>
             </div>
@@ -740,7 +741,7 @@ export const Home: React.FC = () => {
             "
           >
             <div className="flex min-w-0 items-center gap-2">
-              <AlertCircle className="h-4 w-4 shrink-0 text-blue-500" />
+              <AlertCircle className="h-4 w-4 shrink-0 text-[var(--color-brand-accent)]" />
 
               <span className="truncate">
                 {statusMessage}
@@ -784,11 +785,12 @@ export const Home: React.FC = () => {
                         items-center
                         justify-center
                         rounded-2xl
-                        bg-[var(--color-deep-navy)]
+                        bg-[var(--color-brand-accent)]
+                        text-white
                         shadow-lg
                       "
                     >
-                      <Bot className="h-8 w-8 text-[var(--color-brand-accent)]" />
+                      <Bot className="h-8 w-8 text-white" />
                     </div>
 
                     <div className="mt-5">
@@ -832,7 +834,7 @@ export const Home: React.FC = () => {
                             text-gray-700
                             shadow-sm
                             transition
-                            hover:border-blue-200
+                            hover:border-[var(--color-brand-accent)]
                             hover:bg-blue-50/50
                           "
                         >
@@ -843,7 +845,7 @@ export const Home: React.FC = () => {
                     </div>
 
                     <div className="mt-7 flex items-center gap-2 text-[10px] text-gray-400">
-                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                      <ShieldCheck className="h-3.5 w-3.5 text-[var(--color-brand-accent)]" />
                       Responses are grounded in indexed university content.
                     </div>
                   </div>
@@ -871,11 +873,12 @@ export const Home: React.FC = () => {
                                 items-center
                                 justify-center
                                 rounded-xl
-                                bg-[var(--color-deep-navy)]
+                                bg-[var(--color-brand-accent)]
+                                text-white
                                 shadow-sm
                               "
                             >
-                              <Bot className="h-4 w-4 text-[var(--color-brand-accent)]" />
+                              <Bot className="h-4 w-4" />
                             </div>
                           )}
 
@@ -996,10 +999,11 @@ export const Home: React.FC = () => {
                             items-center
                             justify-center
                             rounded-xl
-                            bg-[var(--color-deep-navy)]
+                            bg-[var(--color-brand-accent)]
+                            text-white
                           "
                         >
-                          <Bot className="h-4 w-4 text-[var(--color-brand-accent)]" />
+                          <Bot className="h-4 w-4" />
                         </div>
 
                         <div
@@ -1279,7 +1283,7 @@ export const Home: React.FC = () => {
                           shadow-sm
                           transition
                           hover:-translate-y-0.5
-                          hover:border-blue-200
+                          hover:border-[var(--color-brand-accent)]
                           hover:shadow-md
                         "
                       >
@@ -1303,11 +1307,11 @@ export const Home: React.FC = () => {
                             </div>
                           </div>
 
-                          <FileCheck2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                          <FileCheck2 className="h-4 w-4 shrink-0 text-[var(--color-brand-accent)]" />
                         </div>
 
                         <div className="mt-4 flex items-center justify-between">
-                          <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-600">
+                          <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-[var(--color-brand-accent)]">
                             {doc.category}
                           </span>
 
@@ -1322,7 +1326,7 @@ export const Home: React.FC = () => {
                                 text-gray-400
                                 transition
                                 hover:bg-blue-50
-                                hover:text-blue-600
+                                hover:text-[var(--color-brand-accent)]
                               "
                               title="Preview document"
                             >
@@ -1377,6 +1381,6 @@ export const Home: React.FC = () => {
 // Small reusable icon wrapper
 function BrainCircuitIcon() {
   return (
-    <Sparkles className="h-5 w-5 text-[var(--color-brand-accent)]" />
+    <Sparkles className="h-5 w-5 text-white" />
   );
 }
