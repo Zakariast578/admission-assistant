@@ -10,10 +10,12 @@ from llama_index.core import SimpleDirectoryReader, StorageContext, VectorStoreI
 from app.models.domain import Document
 from app.rag.retrieval.query_engine import get_vector_store, setup_llama_settings
 
+
 def sanitize_text(text: str) -> str:
     if not text:
         return ""
     return text.replace("\x00", "").replace("\u0000", "")
+
 
 def sanitize_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
     cleaned = {}
@@ -24,12 +26,17 @@ def sanitize_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
             cleaned[key] = value
     return cleaned
 
-async def process_and_store_document(file: UploadFile, db: AsyncSession) -> Document:
+
+async def process_and_store_document(
+    file: UploadFile, db: AsyncSession
+) -> Document:
     contents = await file.read()
     file_hash = hashlib.sha256(contents).hexdigest()
 
     # Check for existing duplicate document
-    result = await db.execute(select(Document).filter(Document.file_hash == file_hash))
+    result = await db.execute(
+        select(Document).filter(Document.file_hash == file_hash)
+    )
     existing_doc = result.scalars().first()
     if existing_doc:
         return existing_doc
@@ -51,18 +58,16 @@ async def process_and_store_document(file: UploadFile, db: AsyncSession) -> Docu
 
         setup_llama_settings()
         vector_store = get_vector_store()
-        storage_context = StorageContext.from_defaults(vector_store=vector_store)
+        storage_context = StorageContext.from_defaults(
+            vector_store=vector_store
+        )
 
         VectorStoreIndex.from_documents(
-            documents,
-            storage_context=storage_context,
-            show_progress=True
+            documents, storage_context=storage_context, show_progress=True
         )
 
         doc_record = Document(
-            filename=file.filename,
-            file_hash=file_hash,
-            status="PROCESSED"
+            filename=file.filename, file_hash=file_hash, status="PROCESSED"
         )
         db.add(doc_record)
         await db.commit()

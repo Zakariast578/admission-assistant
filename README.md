@@ -70,23 +70,25 @@ admission-assistant/
 ## ⚡ Tech Stack
 
 ### Backend
-| Layer | Technology |
-|---|---|
-| Framework | FastAPI (Python 3.11+) |
-| RAG Orchestration | LlamaIndex |
-| Vector Store | PostgreSQL + `pgvector` extension (`pgvector/pgvector:pg16`) |
-| ORM / Migrations | Async SQLAlchemy + AsyncPG + Alembic |
-| LLM Provider | Google Gemini (`gemini-2.5-flash` or later) — Ollama fallback |
-| Embedding Model | `BAAI/bge-small-en-v1.5` (384 dimensions) |
+
+| Layer             | Technology                                                       |
+| ----------------- | ---------------------------------------------------------------- |
+| Framework         | FastAPI (Python 3.11+)                                           |
+| RAG Orchestration | LlamaIndex                                                       |
+| Vector Store      | PostgreSQL +`pgvector` extension (`pgvector/pgvector:pg16`)  |
+| ORM / Migrations  | Async SQLAlchemy + AsyncPG + Alembic                             |
+| LLM Provider      | Google Gemini (`gemini-2.5-flash` or later) — Ollama fallback |
+| Embedding Model   | `BAAI/bge-small-en-v1.5` (384 dimensions)                      |
 
 ### Frontend
-| Layer | Technology |
-|---|---|
-| Framework | React 18+ with TypeScript |
-| Build Tool | Vite |
-| Styling | Tailwind CSS, Lucide React icons |
-| Markdown Rendering | `react-markdown` |
-| Document Preview | `docx-preview` for Word docs, native blob URLs for PDFs |
+
+| Layer              | Technology                                                |
+| ------------------ | --------------------------------------------------------- |
+| Framework          | React 18+ with TypeScript                                 |
+| Build Tool         | Vite                                                      |
+| Styling            | Tailwind CSS, Lucide React icons                          |
+| Markdown Rendering | `react-markdown`                                        |
+| Document Preview   | `docx-preview` for Word docs, native blob URLs for PDFs |
 
 > **Note:** `faiss-cpu` and `llama-index-vector-stores-faiss` currently appear in `requirements.txt`, but the active retrieval pipeline (`query_engine.py`) uses `PGVectorStore` against PostgreSQL, not FAISS. If FAISS isn't used elsewhere in your codebase, consider removing those dependencies to avoid confusion and reduce install size.
 
@@ -96,16 +98,17 @@ admission-assistant/
 
 All routes are served under the `/api/v1` prefix.
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/v1/chat` | Submit a user query to the RAG pipeline; returns the generated answer and conversation ID. |
-| `POST` | `/api/v1/documents/upload` | Upload a PDF, DOCX, or TXT file; extracts text, sanitizes it, and indexes embeddings in `pgvector`. |
-| `GET` | `/api/v1/documents/` | List all indexed knowledge base documents. |
-| `GET` | `/api/v1/documents/{document_id}/file` | Stream a document's raw file content for inline viewing or download. |
-| `DELETE` | `/api/v1/documents/{document_id}` | Remove a document's metadata record (and, once wired up, its embeddings). |
-| `GET` | `/api/v1/health` | Service health check. |
+| Method     | Endpoint                                 | Description                                                                                          |
+| ---------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `POST`   | `/api/v1/chat`                         | Submit a user query to the RAG pipeline; returns the generated answer and conversation ID.           |
+| `POST`   | `/api/v1/documents/upload`             | Upload a PDF, DOCX, or TXT file; extracts text, sanitizes it, and indexes embeddings in`pgvector`. |
+| `GET`    | `/api/v1/documents/`                   | List all indexed knowledge base documents.                                                           |
+| `GET`    | `/api/v1/documents/{document_id}/file` | Stream a document's raw file content for inline viewing or download.                                 |
+| `DELETE` | `/api/v1/documents/{document_id}`      | Remove a document's metadata record (and, once wired up, its embeddings).                            |
+| `GET`    | `/api/v1/health`                       | Service health check.                                                                                |
 
 Interactive API docs are available once the server is running:
+
 - Swagger UI: `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
 
@@ -114,6 +117,7 @@ Interactive API docs are available once the server is running:
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Python 3.11+
 - Node.js 18+
 - Docker & Docker Compose

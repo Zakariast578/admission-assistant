@@ -13,22 +13,24 @@ from app.rag.retrieval.query_engine import load_query_engine
 
 router = APIRouter(tags=["Chat Engine"])
 
+
 class ChatPayload(BaseModel):
     message: str
     conversation_id: Optional[str] = None
+
 
 class ChatResponse(BaseModel):
     conversation_id: str
     answer: str
 
+
 @router.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(
-    payload: ChatPayload,
-    db: AsyncSession = Depends(get_db)
+    payload: ChatPayload, db: AsyncSession = Depends(get_db)
 ):
     conversation_id = payload.conversation_id
 
-    # Get or create conversation
+    # 1. Get or create conversation
     if conversation_id:
         result = await db.execute(
             select(Conversation).where(Conversation.id == conversation_id)
@@ -37,7 +39,7 @@ async def chat_endpoint(
         if not conversation:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Conversation not found"
+                detail="Conversation not found",
             )
     else:
         conversation = Conversation()
@@ -46,16 +48,7 @@ async def chat_endpoint(
         await db.refresh(conversation)
         conversation_id = conversation.id
 
-    # Save user message
-    user_msg = DBMessage(
-        conversation_id=conversation_id,
-        sender="user",
-        text=payload.message
-    )
-    db.add(user_msg)
-    await db.commit()
-
-    # Retrieve history
+    # 2. Retrieve history prior to adding current prompt
     history_result = await db.execute(
         select(DBMessage)
         .where(DBMessage.conversation_id == conversation_id)
@@ -63,21 +56,44 @@ async def chat_endpoint(
     )
     chat_history_records = history_result.scalars().all()
 
-    # Query RAG Engine off-thread
+    # Format history into LlamaIndex objects
+    llama_history = [
+        LlamaChatMessage(
+            role=(
+                MessageRole.USER
+                if msg.sender == "user"
+                else MessageRole.ASSISTANT
+            ),
+            content=msg.text,
+        )
+        for msg in chat_history_records
+    ]
+
+    # 3. Save user message to database
+    user_msg = DBMessage(
+        conversation_id=conversation_id, sender="user", text=payload.message
+    )
+    db.add(user_msg)
+    await db.commit()
+
+    # 4. Query RAG Engine off-thread
     query_engine = await run_in_threadpool(load_query_engine)
-    response = await run_in_threadpool(query_engine.query, payload.message)
+
+    # Pass system context or run query
+    response = await run_in_threadpool(
+        query_engine.query, payload.message
+    )
     answer_text = str(response)
 
-    # Save assistant message
+    # 5. Save assistant response
     assistant_msg = DBMessage(
         conversation_id=conversation_id,
         sender="assistant",
-        text=answer_text
+        text=answer_text,
     )
     db.add(assistant_msg)
     await db.commit()
 
     return ChatResponse(
-        conversation_id=conversation_id,
-        answer=answer_text
+        conversation_id=conversation_id, answer=answer_text
     )
