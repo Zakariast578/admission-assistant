@@ -8,7 +8,10 @@ from sqlalchemy.future import select
 
 from app.api.dependencies import get_db
 from app.models.domain import Document
-from app.services.document_service import process_and_store_document
+from app.services.document_service import (
+    process_and_store_document,
+    delete_document_vectors,
+)
 
 router = APIRouter(prefix="/documents", tags=["Documents CRUD"])
 
@@ -129,19 +132,30 @@ async def get_document_file(document_id: str, db: AsyncSession = Depends(get_db)
 @router.delete("/{document_id}", status_code=status.HTTP_200_OK)
 async def delete_document(document_id: str, db: AsyncSession = Depends(get_db)):
     """
-    Deletes the metadata record from PostgreSQL and removes the file from disk.
+    Deletes the metadata record from PostgreSQL, removes the file from disk,
+    and cleans up associated vector embeddings.
     """
     result = await db.execute(select(Document).where(Document.id == document_id))
     doc = result.scalar_one_or_none()
 
     if not doc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document metadata not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Document metadata not found."
+        )
 
-    # Remove physical file if it exists on disk
+    # 1. Clean up vector embeddings in PostgreSQL matching the file hash
+    await delete_document_vectors(file_hash=doc.file_hash, db=db)
+
+    # 2. Remove physical file if it exists on disk
     file_disk_path = Path(getattr(doc, "file_path", UPLOAD_DIR / doc.filename))
     if file_disk_path.exists():
         os.remove(file_disk_path)
 
+    # 3. Delete metadata record from database
     await db.delete(doc)
     await db.commit()
-    return {"message": f"Document record {document_id} and corresponding file deleted successfully."}
+
+    return {
+        "message": f"Document {document_id} and corresponding vector embeddings deleted successfully."
+    }

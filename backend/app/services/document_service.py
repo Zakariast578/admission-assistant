@@ -1,5 +1,3 @@
-# app/services/document_service.py
-
 import hashlib
 import tempfile
 import os
@@ -8,6 +6,7 @@ from typing import Any
 from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import text
 
 from llama_index.core import SimpleDirectoryReader, StorageContext, VectorStoreIndex
 from llama_index.core.schema import Document as LlamaDocument
@@ -43,6 +42,17 @@ def _load_documents_for_upload(tmp_path: str, file_ext: str) -> list[LlamaDocume
         return pdf_docs
 
     return SimpleDirectoryReader(input_files=[tmp_path]).load_data()
+
+
+async def delete_document_vectors(file_hash: str, db: AsyncSession) -> None:
+    """
+    Deletes all chunk embeddings from PostgreSQL matching the given file hash.
+    """
+    query = text(
+        "DELETE FROM data_document_embeddings WHERE metadata_->>'file_hash' = :file_hash"
+    )
+    await db.execute(query, {"file_hash": file_hash})
+    await db.commit()
 
 
 async def process_and_store_document(
@@ -82,8 +92,8 @@ async def process_and_store_document(
         # Initialize LlamaIndex Settings
         setup_llama_settings()
 
-        # Chunk raw documents into structured nodes (512 size / 100 overlap)
-        nodes = chunk_documents(documents, chunk_size=512, chunk_overlap=100)
+        # Chunk raw documents into structured nodes (768 size / 124 overlap)
+        nodes = chunk_documents(documents, chunk_size=768, chunk_overlap=124)
 
         vector_store = get_vector_store()
         storage_context = StorageContext.from_defaults(
