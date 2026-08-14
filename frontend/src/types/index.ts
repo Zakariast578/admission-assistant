@@ -1,31 +1,28 @@
-export interface Conversation {
+export interface HealthCheckResponse {
+  status: 'ok' | 'degraded' | 'error';
+  environment: string;
+  llm_provider: string;
+  index_loaded: boolean;
+}
+
+export interface DocumentItem {
   id: string;
-  title: string | null;
-  created_at: string;
-  updated_at: string;
+  file_name: string;
+  category: string;
+  upload_date: string;
+  file_size?: number;
+  content_type?: string;
 }
 
-export interface ConversationCreate {
-  title?: string;
-}
-
-export interface ConversationUpdate {
-  title: string;
-}
-
-export interface Message {
+export interface ChatMessage {
   id: string;
-  conversation_id: string;
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant';
   content: string;
   created_at: string;
 }
 
-export interface MessageCreate {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-}
-
-export interface MessageUpdate {
-  content: string;
+export interface StreamCallbacks {
+  onToken: (token: string) => void;
+  onComplete?: (data: { conversation_id?: string }) => void;
+  onError?: (error: { message?: string }) => void;
 }

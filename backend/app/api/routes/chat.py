@@ -1,17 +1,17 @@
+import json
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from llama_index.core.llms import ChatMessage as LlamaChatMessage, MessageRole
-
 from app.core.database import get_db
 from app.models.domain import Conversation, ChatMessage as DBMessage
 from app.rag.retrieval.query_engine import load_query_engine
 
-router = APIRouter(tags=["Chat Engine"])
+router = APIRouter(prefix="/chat", tags=["Chat Engine"])
 
 
 class ChatPayload(BaseModel):
@@ -19,13 +19,8 @@ class ChatPayload(BaseModel):
     conversation_id: Optional[str] = None
 
 
-class ChatResponse(BaseModel):
-    conversation_id: str
-    answer: str
-
-
-@router.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(
+@router.post("/stream")
+async def stream_chat_endpoint(
     payload: ChatPayload, db: AsyncSession = Depends(get_db)
 ):
     conversation_id = payload.conversation_id
@@ -48,52 +43,46 @@ async def chat_endpoint(
         await db.refresh(conversation)
         conversation_id = conversation.id
 
-    # 2. Retrieve history prior to adding current prompt
-    history_result = await db.execute(
-        select(DBMessage)
-        .where(DBMessage.conversation_id == conversation_id)
-        .order_by(DBMessage.created_at.asc())
-    )
-    chat_history_records = history_result.scalars().all()
-
-    # Format history into LlamaIndex objects
-    llama_history = [
-        LlamaChatMessage(
-            role=(
-                MessageRole.USER
-                if msg.sender == "user"
-                else MessageRole.ASSISTANT
-            ),
-            content=msg.text,
-        )
-        for msg in chat_history_records
-    ]
-
-    # 3. Save user message to database
+    # 2. Save user message to database
     user_msg = DBMessage(
         conversation_id=conversation_id, sender="user", text=payload.message
     )
     db.add(user_msg)
     await db.commit()
 
-    # 4. Query RAG Engine off-thread
+    # 3. Load RAG query engine
     query_engine = await run_in_threadpool(load_query_engine)
 
-    # Pass system context or run query
-    response = await run_in_threadpool(
-        query_engine.query, payload.message
-    )
-    answer_text = str(response)
+    # 4. Stream Generator Function
+    async def stream_generator():
+        # Execute query off main thread
+        response_stream = await run_in_threadpool(
+            query_engine.query, payload.message
+        )
+        
+        full_text = ""
 
-    # 5. Save assistant response
-    assistant_msg = DBMessage(
-        conversation_id=conversation_id,
-        sender="assistant",
-        text=answer_text,
-    )
-    db.add(assistant_msg)
-    await db.commit()
+        # Stream individual token chunks safely from generator
+        for token in response_stream.response_gen:
+            full_text += token
+            # Yield token as SSE payload
+            yield f"data: {json.dumps({'token': token})}\n\n"
 
-    return ChatResponse(
-        conversation_id=conversation_id, answer=answer_text
-    )
+        # Save assistant message on stream completion
+        assistant_msg = DBMessage(
+            conversation_id=conversation_id,
+            sender="assistant",
+            text=full_text,
+        )
+        db.add(assistant_msg)
+        await db.commit()
+
+        # Send completion event
+        final_meta = {
+            "done": True,
+            "conversation_id": conversation_id,
+            "answer": full_text
+        }
+        yield f"data: {json.dumps(final_meta)}\n\n"
+
+    return StreamingResponse(stream_generator(), media_type="text/event-stream")

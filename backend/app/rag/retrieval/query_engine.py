@@ -1,10 +1,13 @@
+# app/rag/retrieval/query_engine.py
+
 from llama_index.core import VectorStoreIndex, Settings, PromptTemplate
+from llama_index.core.node_parser import SentenceSplitter
 from llama_index.vector_stores.postgres import PGVectorStore
 from llama_index.llms.google_genai import GoogleGenAI
 from llama_index.llms.ollama import Ollama
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
 from app.core.config import settings
+from app.rag.ingestion.embedder import get_embedding_model
 from app.rag.prompts.system_prompt import ADMISSION_ASSISTANT_SYSTEM_PROMPT
 
 
@@ -24,80 +27,48 @@ def get_vector_store() -> PGVectorStore:
 
 
 def setup_llama_settings() -> None:
-    """
-    Configure the global LlamaIndex Settings once.
-    """
-
     global _SETTINGS_INITIALIZED
+
+    # Configure explicit chunking parameters
+    Settings.node_parser = SentenceSplitter(
+        chunk_size=512,
+        chunk_overlap=100
+    )
 
     if _SETTINGS_INITIALIZED:
         return
 
-    # ---------------------------------------------------------
-    # LLM
-    # ---------------------------------------------------------
-
+    # LLM Setup
     if settings.LLM_PROVIDER.lower() == "gemini":
-
         if not settings.GOOGLE_API_KEY:
-            raise ValueError(
-                "GOOGLE_API_KEY is not set in the environment."
-            )
+            raise ValueError("GOOGLE_API_KEY is not set in the environment.")
 
-        model_name = (
-            settings.GENERATIVE_MODEL
-            or "gemini-2.5-flash"
-        )
+        model_name = settings.GENERATIVE_MODEL or "gemini-2.5-flash"
 
         Settings.llm = GoogleGenAI(
             model=model_name,
             api_key=settings.GOOGLE_API_KEY,
-
-            # LLM request timeout
             request_timeout=120.0,
-
-            # More deterministic answers for admission questions
             temperature=0.2,
-
-            # Retry transient Gemini failures
             max_retries=3,
         )
 
     elif settings.LLM_PROVIDER.lower() == "ollama":
-
         Settings.llm = Ollama(
             model=settings.OLLAMA_MODEL,
             base_url=settings.OLLAMA_BASE_URL,
             request_timeout=300.0,
         )
-
     else:
-        raise ValueError(
-            f"Unsupported LLM_PROVIDER: {settings.LLM_PROVIDER}"
-        )
+        raise ValueError(f"Unsupported LLM_PROVIDER: {settings.LLM_PROVIDER}")
 
-    # ---------------------------------------------------------
-    # Embedding model
-    # ---------------------------------------------------------
-
-    if not settings.EMBEDDING_MODEL:
-        raise ValueError(
-            "EMBEDDING_MODEL is not configured."
-        )
-
-    Settings.embed_model = HuggingFaceEmbedding(
-        model_name=settings.EMBEDDING_MODEL
-    )
+    # Embedding Model Setup (with query instruction for BGE search)
+    Settings.embed_model = get_embedding_model(with_query_instruction=True)
 
     _SETTINGS_INITIALIZED = True
 
 
 def load_query_engine():
-    """
-    Load the PostgreSQL vector store and create the
-    LlamaIndex query engine.
-    """
-
     setup_llama_settings()
 
     vector_store = get_vector_store()
@@ -106,14 +77,12 @@ def load_query_engine():
         vector_store=vector_store
     )
 
-    qa_prompt = PromptTemplate(
-        ADMISSION_ASSISTANT_SYSTEM_PROMPT
-    )
+    qa_prompt = PromptTemplate(ADMISSION_ASSISTANT_SYSTEM_PROMPT)
 
     query_engine = index.as_query_engine(
         similarity_top_k=8,
         text_qa_template=qa_prompt,
-        streaming=False,
+        streaming=True,
     )
 
     return query_engine

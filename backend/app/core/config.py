@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     GOOGLE_API_KEY: str = ""
     GENERATIVE_MODEL: str = "gemini-3.6-flash"
     
-    # Hugging Face & Embeddings
+    # Embeddings (384 dimensions)
     HF_TOKEN: str = ""
     EMBEDDING_MODEL: str = "BAAI/bge-small-en-v1.5"
 
@@ -35,11 +35,6 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str = "127.0.0.1"
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: str = "snu_admissions_db"
-
-    # Storage Paths
-    FAISS_INDEX_PATH: str = "data/processed/faiss_index"
-    METADATA_DB_PATH: str = "data/processed/metadata.db"
-    RAW_DOCS_PATH: str = "data/raw_documents"
 
     model_config = SettingsConfigDict(
         env_file=".env",

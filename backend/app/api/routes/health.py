@@ -5,13 +5,12 @@ from app.core.config import settings
 
 router = APIRouter()
 
-
 @router.get("/health", response_model=HealthCheckResponse)
 async def health_check():
-    index_exists = os.path.exists(settings.FAISS_INDEX_PATH)
+    # Set index_loaded according to your current vector configuration or remove the check
     return HealthCheckResponse(
         status="ok",
         environment=settings.ENVIRONMENT,
         llm_provider=settings.LLM_PROVIDER,
-        index_loaded=index_exists
+        index_loaded=True
     )

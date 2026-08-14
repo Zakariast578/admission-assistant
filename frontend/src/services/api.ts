@@ -1,115 +1,118 @@
-import type { DocumentItem, HealthCheckResponse } from '../types/index';
+import type { HealthCheckResponse } from '../types/index';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
-export interface ChatResponse {
-  conversation_id: string;
-  answer: string;
-}
+/**
+ * Checks backend health status and knowledge index state.
+ */
+export async function fetchHealthStatus(): Promise<HealthCheckResponse> {
+  const response = await fetch(`${API_BASE_URL}/health`);
 
-interface BackendDocument {
-  id: string;
-  title?: string;
-  category?: string;
-  file_name: string;
-  status: string;
-  upload_date: string;
-}
-
-interface BackendUploadResponse {
-  message: string;
-  id: string;
-  filename: string;
-  status: string;
-}
-
-async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    const errorText = await response.text();
-    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-    try {
-      const parsedError = JSON.parse(errorText);
-      if (parsedError.detail) {
-        errorMessage = typeof parsedError.detail === 'string' ? parsedError.detail : JSON.stringify(parsedError.detail);
-      }
-    } catch {
-      if (errorText) errorMessage = errorText;
-    }
-    throw new Error(errorMessage);
-  }
-
-  if (response.status === 204) {
-    return {} as T;
+    throw new Error(`Health check failed with status: ${response.status}`);
   }
 
   return response.json();
 }
 
-// HEALTH CHECK
-export async function fetchHealthStatus(): Promise<HealthCheckResponse> {
-  const response = await fetch(`${API_BASE}/health`);
-  return handleResponse<HealthCheckResponse>(response);
-}
-
-// CHAT ENDPOINT
-export async function sendChatMessage(
+/**
+ * Streaming chat message handler
+ */
+export async function streamChatMessage(
   message: string,
-  conversationId: string | null = null
-): Promise<ChatResponse> {
-  const sanitizedMessage = message.trim();
-  if (!sanitizedMessage) {
-    throw new Error('Message cannot be empty');
+  conversationId: string | null,
+  callbacks: {
+    onToken: (token: string) => void;
+    onComplete?: (data: { conversation_id?: string }) => void;
+    onError?: (error: { message?: string }) => void;
   }
+): Promise<void> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/chat/stream`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message,
+        conversation_id: conversationId,
+      }),
+    });
 
-  const response = await fetch(`${API_BASE}/chat`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      message: sanitizedMessage,
-      conversation_id: conversationId,
-    }),
-  });
+    if (!response.ok || !response.body) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-  return handleResponse<ChatResponse>(response);
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const rawData = line.slice(6).trim();
+          if (rawData === '[DONE]') continue;
+
+          try {
+            const parsed = JSON.parse(rawData);
+            if (parsed.token) {
+              callbacks.onToken(parsed.token);
+            }
+            if (parsed.conversation_id && callbacks.onComplete) {
+              callbacks.onComplete({ conversation_id: parsed.conversation_id });
+            }
+          } catch {
+            // Raw text fallback if backend streams non-JSON string chunks
+            callbacks.onToken(rawData);
+          }
+        }
+      }
+    }
+
+    if (callbacks.onComplete) {
+      callbacks.onComplete({});
+    }
+  } catch (err: any) {
+    if (callbacks.onError) {
+      callbacks.onError({ message: err.message || 'Stream connection failed.' });
+    }
+  }
 }
 
-// DOCUMENTS ENDPOINTS
-export async function fetchDocuments(): Promise<DocumentItem[]> {
-  const response = await fetch(`${API_BASE}/documents/`);
-  const documents = await handleResponse<BackendDocument[]>(response);
-
-  return documents.map((doc) => ({
-    id: doc.id,
-    title: doc.title || doc.file_name.replace(/\.[^.]+$/, ''),
-    category: doc.category || 'General',
-    file_name: doc.file_name,
-    upload_date: doc.upload_date || new Date().toISOString().slice(0, 10),
-  }));
+/**
+ * Document endpoints
+ */
+export async function fetchDocuments() {
+  const response = await fetch(`${API_BASE_URL}/documents`);
+  if (!response.ok) throw new Error('Failed to fetch documents.');
+  return response.json();
 }
 
-export async function uploadDocument(file: File, category: string): Promise<DocumentItem> {
+export async function uploadDocument(file: File, category: string) {
   const formData = new FormData();
   formData.append('file', file);
+  formData.append('category', category);
 
-  const response = await fetch(`${API_BASE}/documents/upload`, {
+  const response = await fetch(`${API_BASE_URL}/documents/upload`, {
     method: 'POST',
     body: formData,
   });
 
-  const uploadResult = await handleResponse<BackendUploadResponse>(response);
-
-  return {
-    id: uploadResult.id,
-    title: uploadResult.filename.replace(/\.[^.]+$/, ''),
-    category: category || 'General',
-    file_name: uploadResult.filename,
-    upload_date: new Date().toISOString().slice(0, 10),
-  };
+  if (!response.ok) throw new Error('Failed to upload document.');
+  return response.json();
 }
 
-export async function deleteDocument(docId: string): Promise<void> {
-  const response = await fetch(`${API_BASE}/documents/${docId}`, {
+export async function deleteDocument(docId: string) {
+  const response = await fetch(`${API_BASE_URL}/documents/${docId}`, {
     method: 'DELETE',
   });
-  return handleResponse<void>(response);
+
+  if (!response.ok) throw new Error('Failed to delete document.');
+  return response.json();
 }
