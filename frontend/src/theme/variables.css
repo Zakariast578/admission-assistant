@@ -1,10 +1,12 @@
-/* src/theme/variables.css */
 :root {
   --color-brand-accent: #0693e3;
+  --color-brand-accent-hover: #057ac0;
+  --color-brand-accent-light: rgba(6, 147, 227, 0.1);
   --color-text-body: #727272;
   --color-crimson-accent: #C62828;
   --color-muted-gold: #8A6B1F;
   --color-deep-navy: #002147;
+  --color-deep-navy-hover: #001733;
   --color-border-muted: #DADADA;
   --color-soft-neutral: #F2F2F2;
   --color-surface-white: #FFFFFF;
