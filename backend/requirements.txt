@@ -9,7 +9,7 @@ httpx==0.28.1
 tenacity==9.1.4
 
 # LlamaIndex & Local Integration Drivers
-llama-index-core==0.14.23
+llama-index-core==0.12.4
 llama-index-llms-gemini==0.6.2
 llama-index-llms-ollama==0.6.0
 llama-index-llms-google-genai==0.9.6
